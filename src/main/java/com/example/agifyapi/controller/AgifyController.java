@@ -4,6 +4,8 @@ import com.example.agifyapi.model.AgifyResponse;
 import com.example.agifyapi.service.AgifyService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.MediaType;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api")
@@ -16,8 +18,23 @@ public class AgifyController {
     }
 
     @GetMapping(value = "/edad", produces = MediaType.APPLICATION_JSON_VALUE)
-    public AgifyResponse getEdadPorNombre(@RequestParam String nombre) {
-        return agifyService.getEstimatedAge(nombre);
+    public Map<String, Object> getEdadPorNombre(
+            @RequestParam String nombre,
+            @RequestParam(required = false) Integer edadReal) {
+
+        AgifyResponse respuesta = agifyService.getEstimatedAge(nombre);
+
+        Map<String, Object> resultado = new HashMap<>();
+        resultado.put("name", respuesta.getName());
+        resultado.put("estimatedAge", respuesta.getAge());
+        resultado.put("count", respuesta.getCount());
+
+        if (edadReal != null) {
+            resultado.put("realAge", edadReal);
+            resultado.put("match", edadReal.equals(respuesta.getAge()));
+        }
+
+        return resultado;
     }
 
 }
